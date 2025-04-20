@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndiSpeech Translator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a0ca3;
+            --primary-light: #7209b7;
+            --secondary-color: #f72585;
+            --success-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            color: var(--light-color);
+            background-color: #0a0a20;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.6);
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10,10,30,0.7) 0%, rgba(0,0,0,0.85) 100%);
+        }
+
+        .main-header {
+            position: relative;
+            z-index: 100;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        nav a.active {
+            color: var(--primary-color);
+        }
+
+        nav i {
+            font-size: 1.1rem;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .title-wrapper h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInDown 1s ease;
+        }
+
+        .app-description {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            animation: fadeIn 1s ease 0.3s both;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .languages-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 50px;
+            max-width: 800px;
+            animation: fadeIn 1s ease 0.9s both;
+        }
+
+        .language-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .language-card:nth-child(1) { animation-delay: 0s; }
+        .language-card:nth-child(2) { animation-delay: 0.5s; }
+        .language-card:nth-child(3) { animation-delay: 1s; }
+        .language-card:nth-child(4) { animation-delay: 1.5s; }
+        .language-card:nth-child(5) { animation-delay: 2s; }
+        .language-card:nth-child(6) { animation-delay: 2.5s; }
+        .language-card:nth-child(7) { animation-delay: 3s; }
+
+        .language-card:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            animation-play-state: paused;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .language-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: linear-gradient(90deg, var(--success-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 15px 20px;
+            }
+
+            .logo h2 {
+                font-size: 1.5rem;
+            }
+
+            nav ul {
+                gap: 15px;
+            }
+
+            .title-wrapper h1 {
+                font-size: 2.5rem;
+            }
+
+            .app-description {
+                font-size: 1.1rem;
+            }
+
+            .language-card {
+                padding: 10px 20px;
+            }
+
+            .language-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <video autoplay loop muted playsinline>
+            <source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <header class="main-header">
+        <div class="logo">
+            <h2>Indi<span>Speech</span></h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('welcome') }}" class="active"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-language"></i> Translate</a></li>
+                <li><a href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="welcome-content">
+        <div class="title-wrapper">
+            <h1>IndiSpeech</h1>
+        </div>
+        
+        <p class="app-description">
+            Break language barriers with our advanced speech translation technology.
+            Seamlessly translate your voice or text between multiple Indian languages in real-time.
+        </p>
+
+        <a href="{{ url_for('index') }}" class="cta-button">
+            <i class="fas fa-play"></i>
+            Start Translating Now
+        </a>
+
+        <div class="languages-grid">
+            <div class="language-card">
+                <span class="language-text">हिंदी</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">తెలుగు</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">ಕನ್ನಡ</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">தமிழ்</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">മലയാളം</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">বাংলা</span>
+            </div>
+            <div class="language-card">
+                <span class="language-text">English</span>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

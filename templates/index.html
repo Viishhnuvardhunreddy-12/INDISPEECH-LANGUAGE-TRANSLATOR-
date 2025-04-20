@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>IndiSpeech Translator</title>
+</head>
+<body>
+    <div class="video-container">
+        <video autoplay loop muted playsinline id="bg-video">
+            <source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <header class="main-header">
+        <div class="logo">
+            <h2>Indi<span>Speech</span></h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('welcome') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-language"></i> Translate</a></li>
+                <li><a href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="flex-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>How It Works</h3>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Record Voice</h4>
+                    <p>Use the microphone to record your voice in any language</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-file-audio"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Upload Audio</h4>
+                    <p>Upload pre-recorded audio files for translation</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-keyboard"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Type Text</h4>
+                    <p>Simply type your text in the input area</p>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>Select Language</h4>
+                    <p>Choose your target language from multiple Indian options</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="center-panel">
+            <div class="panel-header">
+                <i class="fas fa-globe-asia"></i>
+                <h3>Translate Now</h3>
+            </div>
+            <form id="speech-form" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="language">
+                        <i class="fas fa-language"></i> Target Language
+                    </label>
+                    <select id="language" name="language">
+                        <option value="Hindi">Hindi (हिंदी)</option>
+                        <option value="Telugu">Telugu (తెలుగు)</option>
+                        <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                        <option value="Tamil">Tamil (தமிழ்)</option>
+                        <option value="Malayalam">Malayalam (മലയാളം)</option>
+                        <option value="Bengali">Bengali (বাংলা)</option>
+                        <option value="English">English</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="audio">
+                        <i class="fas fa-file-audio"></i> Upload Audio File
+                    </label>
+                    <div class="custom-file-input">
+                        <input type="file" id="audio" name="audio" accept="audio/*">
+                        <div class="file-input-label">Choose audio file</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="script">
+                        <i class="fas fa-keyboard"></i> Type Script
+                    </label>
+                    <textarea id="script" name="script" rows="4" placeholder="type your text here for translation..."></textarea>
+                </div>
+                
+                <div class="buttons-container">
+                    <button type="submit" class="primary-btn">
+                        <i class="fas fa-sync-alt"></i> Translate
+                    </button>
+                    
+                    <div class="record-controls">
+                        <button id="record-btn" type="button">
+                            <i class="fas fa-microphone"></i> Record Voice
+                        </button>
+                        <button id="stop-btn" type="button" disabled>
+                            <i class="fas fa-stop-circle"></i> Stop
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="recording-indicator">
+                    <div class="recording-waves">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <p>Recording in progress...</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="panel-header">
+                <i class="fas fa-comment-dots"></i>
+                <h3>Translation Results</h3>
+            </div>
+            
+            <div id="result">
+                <div class="result-box">
+                    <div class="result-header">
+                        <i class="fas fa-headphones"></i>
+                        <h4>Original Text</h4>
+                    </div>
+                    <p id="recognized-text" class="result-text">Waiting for input...</p>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-header">
+                        <i class="fas fa-language"></i>
+                        <h4>Translated Text</h4>
+                    </div>
+                    <p id="translated-text" class="result-text">Translation will appear here</p>
+                </div>
+                
+                <div class="audio-player">
+                    <h4><i class="fas fa-volume-up"></i> Listen</h4>
+                    <audio id="translated-audio" controls style="display: none;"></audio>
+                </div>
+                
+                <div class="result-actions">
+                    <button id="copy-btn" class="action-btn" title="Copy translated text">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button id="download-btn" class="action-btn" title="Download audio file">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button id="share-btn" class="action-btn" title="Share translation">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="marquee">
+        <p>
+            IndiSpeech - Break language barriers effortlessly
+            <span class="rocket">🚀</span> 
+            Supporting Hindi, Telugu, Kannada, Tamil, Malayalam, Bengali, and more!
+            <span class="surfing-man">🏄</span>
+            <span class="wave">🌊</span>
+        </p>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script>
+        // Additional JavaScript for enhanced UI interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const shareBtn = document.getElementById('share-btn');
+            const fileInput = document.getElementById('audio');
+            const fileInputLabel = document.querySelector('.file-input-label');
+            const recordingIndicator = document.querySelector('.recording-indicator');
+            
+            // Show file name when file is selected
+            fileInput.addEventListener('change', function() {
+                if(this.files && this.files[0]) {
+                    fileInputLabel.textContent = this.files[0].name;
+                    fileInputLabel.classList.add('file-selected');
+                } else {
+                    fileInputLabel.textContent = 'Choose audio file';
+                    fileInputLabel.classList.remove('file-selected');
+                }
+            });
+            
+            // Show recording indicator during recording
+            const originalRecordStart = recognition.addEventListener.bind(recognition, 'start');
+            const originalRecordEnd = recognition.addEventListener.bind(recognition, 'end');
+            
+            recognition.addEventListener = function(event, callback) {
+                if(event === 'start') {
+                    originalRecordStart(() => {
+                        recordingIndicator.classList.add('active');
+                        callback();
+                    });
+                } else if(event === 'end') {
+                    originalRecordEnd(() => {
+                        recordingIndicator.classList.remove('active');
+                        callback();
+                    });
+                } else {
+                    originalRecordStart(callback);
+                }
+            }
+            
+            // Copy translated text
+            copyBtn.addEventListener('click', function() {
+                const text = document.getElementById('translated-text').textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Copied to clipboard!');
+                    copyBtn.classList.add('clicked');
+                    setTimeout(() => copyBtn.classList.remove('clicked'), 500);
+                });
+            });
+            
+            // Download audio
+            downloadBtn.addEventListener('click', function() {
+                const audio = document.getElementById('translated-audio');
+                if(audio.src) {
+                    const link = document.createElement('a');
+                    link.href = audio.src;
+                    link.download = 'translated_audio.mp3';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    downloadBtn.classList.add('clicked');
+                    setTimeout(() => downloadBtn.classList.remove('clicked'), 500);
+                } else {
+                    showToast('No audio available to download');
+                }
+            });
+            
+            // Create toast notification
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000);
+            }
+            
+            // Share functionality (simplified)
+            shareBtn.addEventListener('click', function() {
+                if(navigator.share) {
+                    navigator.share({
+                        title: 'IndiSpeech Translation',
+                        text: document.getElementById('translated-text').textContent,
+                    })
+                    .catch(console.error);
+                } else {
+                    showToast('Sharing not supported on this browser');
+                }
+                
+                shareBtn.classList.add('clicked');
+                setTimeout(() => shareBtn.classList.remove('clicked'), 500);
+            });
+        });
+    </script>
+</body>
+</html>
